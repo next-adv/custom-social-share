@@ -7,11 +7,10 @@
   "types": "dist/esm/index.d.ts",
   "unpkg": "dist/plugin.js",
   "files": [
-    "android/src/main/",
-    "android/build.gradle",
+    "src/",
+    "android/",
     "dist/",
-    "ios/Sources",
-    "ios/Tests",
+    "ios/",
     "Package.swift",
     "CustomSocialShare.podspec"
   ],
