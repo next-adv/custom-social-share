@@ -1,6 +1,6 @@
 {
   "name": "custom-social-share",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Ti permette di condividere video o immagini direttamente come storie sui social",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
