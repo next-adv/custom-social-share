@@ -32,13 +32,14 @@ npx cap sync
 shareToInstagramFromUrl(options: ShareToInstagramOptions) => Promise<void>
 ```
 
-Condivide su Instagram: storia, post o reel (dove supportato).
+Condivide su Instagram: storia, post o reel.
 
 | Param         | Type                                                                        |
 | ------------- | --------------------------------------------------------------------------- |
 | **`options`** | <code><a href="#sharetoinstagramoptions">ShareToInstagramOptions</a></code> |
 
----
+--------------------
+
 
 ### shareToFacebookFromUrl(...)
 
@@ -46,15 +47,17 @@ Condivide su Instagram: storia, post o reel (dove supportato).
 shareToFacebookFromUrl(options: ShareToFacebookOptions) => Promise<void>
 ```
 
-Condivide su Facebook: storia o post (reel non supportato nativamente).
+Condivide su Facebook: storia, post o reel.
 
 | Param         | Type                                                                      |
 | ------------- | ------------------------------------------------------------------------- |
 | **`options`** | <code><a href="#sharetofacebookoptions">ShareToFacebookOptions</a></code> |
 
----
+--------------------
+
 
 ### Interfaces
+
 
 #### ShareToInstagramOptions
 
@@ -64,23 +67,22 @@ Condivide su Facebook: storia o post (reel non supportato nativamente).
 | **`destination`** | <code><a href="#instagramdestination">InstagramDestination</a></code> |
 | **`content_url`** | <code>string</code>                                                   |
 
+
 #### ShareToFacebookOptions
 
-| Prop              | Type                                                                |                                     |
-| ----------------- | ------------------------------------------------------------------- | ----------------------------------- |
-| **`url`**         | <code>string</code>                                                 |                                     |
-| **`destination`** | <code><a href="#facebookdestination">FacebookDestination</a></code> |                                     |
-| **`content_url`** | <code>string</code>                                                 | *(opzionale, solo Android stories)* |
+| Prop              | Type                                                                  |
+| ----------------- | --------------------------------------------------------------------- |
+| **`url`**         | <code>string</code>                                                   |
+| **`destination`** | <code><a href="#instagramdestination">InstagramDestination</a></code> |
+| **`content_url`** | <code>string</code>                                                   |
+
 
 ### Type Aliases
+
 
 #### InstagramDestination
 
 <code>'story' | 'post' | 'reel'</code>
-
-#### FacebookDestination
-
-<code>'story' | 'post'</code>
 
 </docgen-api>
 ```
