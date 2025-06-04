@@ -40,6 +40,23 @@ public class CustomSocialSharePlugin extends Plugin {
         new DownloadAndShareTask(call, contentUrl, destination).execute(fileUrl);
     }
 
+    @PluginMethod
+    public void shareToFacebookFromUrl(PluginCall call) {
+        String fileUrl = call.getString("url");
+        String destination = call.getString("destination"); // story, post
+
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            call.reject("url is required");
+            return;
+        }
+
+        if (destination == null || destination.isEmpty()) {
+            destination = "post";
+        }
+
+        new DownloadAndShareToFacebookTask(call, destination).execute(fileUrl);
+    }
+
     private class DownloadAndShareTask extends AsyncTask<String, Void, Uri> {
         private final PluginCall call;
         private final String contentUrl;
@@ -138,6 +155,94 @@ public class CustomSocialSharePlugin extends Plugin {
 
             } catch (Exception e) {
                 Log.e("CustomSocialShare", "Error sharing to Instagram", e);
+                call.reject("Sharing error: " + e.getMessage());
+            }
+        }
+    }
+
+    private class DownloadAndShareToFacebookTask extends AsyncTask<String, Void, Uri> {
+        private final PluginCall call;
+        private final String destination;
+        private String mimeType;
+        private File localFile;
+
+        DownloadAndShareToFacebookTask(PluginCall call, String destination) {
+            this.call = call;
+            this.destination = destination;
+        }
+
+        @Override
+        protected Uri doInBackground(String... strings) {
+            try {
+                String urlString = strings[0];
+                URL url = new URL(urlString);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                InputStream input = connection.getInputStream();
+
+                String extension = urlString.toLowerCase().endsWith(".mp4") ? ".mp4" : ".jpg";
+                mimeType = extension.equals(".mp4") ? "video/mp4" : "image/jpeg";
+
+                localFile = new File(getContext().getCacheDir(), "shared_facebook_content" + extension);
+                FileOutputStream output = new FileOutputStream(localFile);
+
+                byte[] buffer = new byte[4096];
+                int len;
+                while ((len = input.read(buffer)) > 0) {
+                    output.write(buffer, 0, len);
+                }
+
+                output.close();
+                input.close();
+
+                return FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", localFile);
+            } catch (Exception e) {
+                Log.e("CustomSocialShare", "Facebook download error", e);
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Uri uri) {
+            if (uri == null) {
+                call.reject("Download or file error");
+                return;
+            }
+
+            try {
+                Intent intent;
+
+                if ("story".equalsIgnoreCase(destination)) {
+                    intent = new Intent("com.facebook.stories.ADD_TO_STORY");
+                    intent.setDataAndType(uri, mimeType);
+                    intent.setPackage("com.facebook.katana");
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    getContext().grantUriPermission("com.facebook.katana", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    getContext().startActivity(intent);
+                    call.resolve();
+                    return;
+                }
+
+                intent = new Intent(Intent.ACTION_SEND);
+                intent.setType(mimeType);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                intent.setPackage("com.facebook.katana");
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                getContext().grantUriPermission("com.facebook.katana", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                try {
+                    getContext().startActivity(intent);
+                    call.resolve();
+                } catch (ActivityNotFoundException e) {
+                    Log.w("CustomSocialShare", "Facebook activity not found, fallback to chooser");
+                    intent.setPackage(null);
+                    getContext().startActivity(Intent.createChooser(intent, "Condividi con Facebook"));
+                    call.resolve();
+                }
+
+            } catch (Exception e) {
+                Log.e("CustomSocialShare", "Error sharing to Facebook", e);
                 call.reject("Sharing error: " + e.getMessage());
             }
         }

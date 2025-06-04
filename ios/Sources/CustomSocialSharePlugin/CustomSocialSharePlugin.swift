@@ -6,6 +6,7 @@ import UIKit
 public class CustomSocialSharePlugin: CAPPlugin, UIDocumentInteractionControllerDelegate {
     var documentController: UIDocumentInteractionController?
 
+    // MARK: Instagram Sharing
     @objc func shareToInstagramFromUrl(_ call: CAPPluginCall) {
         guard let urlString = call.getString("url"),
               let destination = call.getString("destination"),
@@ -14,21 +15,47 @@ public class CustomSocialSharePlugin: CAPPlugin, UIDocumentInteractionController
             return
         }
 
-        let contentUrl = call.getString("content_url") // usabile eventualmente nelle stories (non supportato ufficialmente da Instagram iOS)
+        let contentUrl = call.getString("content_url") // not officially supported on iOS
 
-        downloadMedia(from: mediaURL) { localURL, uti in
+        downloadMedia(from: mediaURL, filename: "shared_instagram_content") { localURL, uti in
             guard let localURL = localURL else {
                 call.reject("Download failed")
                 return
             }
 
             DispatchQueue.main.async {
-                self.share(localURL: localURL, uti: uti, destination: destination, call: call)
+                self.share(localURL: localURL, uti: uti, destination: destination, app: "instagram", call: call)
             }
         }
     }
 
-    private func downloadMedia(from url: URL, completion: @escaping (URL?, String) -> Void) {
+    // MARK: Facebook Sharing
+    @objc func shareToFacebookFromUrl(_ call: CAPPluginCall) {
+        guard let urlString = call.getString("url"),
+              let destination = call.getString("destination"),
+              let mediaURL = URL(string: urlString) else {
+            call.reject("Missing or invalid URL or destination")
+            return
+        }
+
+        downloadMedia(from: mediaURL, filename: "shared_facebook_content") { localURL, uti in
+            guard let localURL = localURL else {
+                call.reject("Download failed")
+                return
+            }
+
+            DispatchQueue.main.async {
+                if destination.lowercased() == "story" {
+                    self.shareToFacebookStory(localURL: localURL, uti: uti, call: call)
+                } else {
+                    self.share(localURL: localURL, uti: uti, destination: destination, app: "facebook", call: call)
+                }
+            }
+        }
+    }
+
+    // MARK: Media Download
+    private func downloadMedia(from url: URL, filename: String, completion: @escaping (URL?, String) -> Void) {
         let task = URLSession.shared.downloadTask(with: url) { tempURL, _, error in
             guard let tempURL = tempURL, error == nil else {
                 completion(nil, "")
@@ -37,7 +64,7 @@ public class CustomSocialSharePlugin: CAPPlugin, UIDocumentInteractionController
 
             let ext = url.pathExtension.lowercased()
             let uti = (ext == "mp4") ? "com.apple.quicktime-movie" : "public.jpeg"
-            let localURL = FileManager.default.temporaryDirectory.appendingPathComponent("shared_instagram_content.\(ext)")
+            let localURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(filename).\(ext)")
 
             do {
                 try? FileManager.default.removeItem(at: localURL)
@@ -50,20 +77,45 @@ public class CustomSocialSharePlugin: CAPPlugin, UIDocumentInteractionController
         task.resume()
     }
 
-    private func share(localURL: URL, uti: String, destination: String, call: CAPPluginCall) {
+    // MARK: Instagram/Facebook Post Sharing
+    private func share(localURL: URL, uti: String, destination: String, app: String, call: CAPPluginCall) {
         documentController = UIDocumentInteractionController(url: localURL)
         documentController?.uti = uti
         documentController?.delegate = self
         documentController?.annotation = [:]
 
-        // Le Stories supportano sticker background solo tramite scheme dedicati, non ufficialmente via UIDocumentInteractionController
-        // In ogni caso, questo apre l’interfaccia Instagram e consente la scelta dell’azione (Post, Reel, Direct, ecc.)
         let view = self.bridge?.viewController?.view ?? UIView()
 
         if !documentController!.presentOpenInMenu(from: view.frame, in: view, animated: true) {
-            call.reject("Instagram not available")
+            call.reject("\(app.capitalized) not available")
         } else {
             call.resolve()
+        }
+    }
+
+    // MARK: Facebook Story Sharing (via URL scheme)
+    private func shareToFacebookStory(localURL: URL, uti: String, call: CAPPluginCall) {
+        guard let pasteboardItems = try? Data(contentsOf: localURL) else {
+            call.reject("Unable to read file for Facebook story")
+            return
+        }
+
+        let ext = localURL.pathExtension.lowercased()
+        let mimeType = (ext == "mp4") ? "video/mp4" : "image/jpeg"
+
+        let pasteboardOptions: [UIPasteboard.OptionsKey: Any] = [.expirationDate: Date().addingTimeInterval(300)]
+        UIPasteboard.general.setItems([[mimeType: pasteboardItems]], options: pasteboardOptions)
+
+        if let url = URL(string: "facebook-stories://share") {
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:]) { _ in
+                    call.resolve()
+                }
+            } else {
+                call.reject("Facebook app not installed or does not support stories")
+            }
+        } else {
+            call.reject("Invalid Facebook URL scheme")
         }
     }
 }

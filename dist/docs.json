@@ -22,6 +22,24 @@
           "ShareToInstagramOptions"
         ],
         "slug": "sharetoinstagramfromurl"
+      },
+      {
+        "name": "shareToFacebookFromUrl",
+        "signature": "(options: ShareToFacebookOptions) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "ShareToFacebookOptions"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "Condivide su Facebook: storia, post o reel.",
+        "complexTypes": [
+          "ShareToFacebookOptions"
+        ],
+        "slug": "sharetofacebookfromurl"
       }
     ],
     "properties": []
@@ -30,6 +48,38 @@
     {
       "name": "ShareToInstagramOptions",
       "slug": "sharetoinstagramoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "url",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "destination",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "InstagramDestination"
+          ],
+          "type": "InstagramDestination"
+        },
+        {
+          "name": "content_url",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "ShareToFacebookOptions",
+      "slug": "sharetofacebookoptions",
       "docs": "",
       "tags": [],
       "methods": [],
