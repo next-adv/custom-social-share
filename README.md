@@ -70,17 +70,22 @@ Condivide su Facebook: storia, post o reel.
 
 #### ShareToFacebookOptions
 
-| Prop              | Type                                                                  |
-| ----------------- | --------------------------------------------------------------------- |
-| **`url`**         | <code>string</code>                                                   |
-| **`destination`** | <code><a href="#instagramdestination">InstagramDestination</a></code> |
-| **`content_url`** | <code>string</code>                                                   |
+| Prop              | Type                                                                |
+| ----------------- | ------------------------------------------------------------------- |
+| **`url`**         | <code>string</code>                                                 |
+| **`destination`** | <code><a href="#facebookdestination">FacebookDestination</a></code> |
+| **`content_url`** | <code>string</code>                                                 |
 
 
 ### Type Aliases
 
 
 #### InstagramDestination
+
+<code>'story' | 'post' | 'reel'</code>
+
+
+#### FacebookDestination
 
 <code>'story' | 'post' | 'reel'</code>
 

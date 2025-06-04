@@ -9,7 +9,7 @@ export interface ShareToInstagramOptions {
 
 export interface ShareToFacebookOptions {
     url: string; // URL dell'immagine o video remoto
-    destination: InstagramDestination;
+    destination: FacebookDestination;
     content_url?: string; // solo per le storie
 }
 

@@ -96,9 +96,9 @@
           "tags": [],
           "docs": "",
           "complexTypes": [
-            "InstagramDestination"
+            "FacebookDestination"
           ],
-          "type": "InstagramDestination"
+          "type": "FacebookDestination"
         },
         {
           "name": "content_url",
@@ -115,6 +115,25 @@
     {
       "name": "InstagramDestination",
       "slug": "instagramdestination",
+      "docs": "",
+      "types": [
+        {
+          "text": "'story'",
+          "complexTypes": []
+        },
+        {
+          "text": "'post'",
+          "complexTypes": []
+        },
+        {
+          "text": "'reel'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "FacebookDestination",
+      "slug": "facebookdestination",
       "docs": "",
       "types": [
         {

@@ -7,7 +7,7 @@ export interface ShareToInstagramOptions {
 }
 export interface ShareToFacebookOptions {
     url: string;
-    destination: InstagramDestination;
+    destination: FacebookDestination;
     content_url?: string;
 }
 export interface CustomSocialSharePlugin {
